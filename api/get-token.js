@@ -9,6 +9,7 @@ module.exports = async function (req, res) {
   try {
     const data = qs.stringify(req.body);
 
+    //POST
     const response = await axios.post(
       "https://login.microsoftonline.com/1e6a5fc4-072c-4f6e-bd38-3d312e331366/oauth2/v2.0/token",
       data,
