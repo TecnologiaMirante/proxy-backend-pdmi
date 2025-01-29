@@ -1,0 +1,29 @@
+const axios = require("axios");
+const qs = require("qs");
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método não permitido" });
+  }
+
+  try {
+    // Converte os dados para x-www-form-urlencoded
+    const data = qs.stringify(req.body);
+
+    // Faz a requisição para a Microsoft
+    const response = await axios.post(
+      "https://login.microsoftonline.com/1e6a5fc4-072c-4f6e-bd38-3d312e331366/oauth2/v2.0/token",
+      data,
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar token:", error.response?.data || error.message);
+
+    res.status(error.response?.status || 500).json({
+      error: error.message,
+      details: error.response?.data,
+    });
+  }
+}
