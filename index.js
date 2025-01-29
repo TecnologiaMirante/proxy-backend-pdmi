@@ -1,22 +1,27 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const qs = require("qs"); // Biblioteca para formatar os dados
 
 const app = express();
 
-// Habilita CORS (opcional, só para testes locais)
+// Habilita CORS (se precisar de mais segurança, especifique as origens permitidas)
 app.use(cors());
 
 // Configura o servidor para entender JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Para suportar x-www-form-urlencoded
 
 // Rota para o proxy
 app.post("/get-token", async (req, res) => {
   try {
-    // Faz a requisição para o servidor da Microsoft
+    // Converte os dados do corpo para x-www-form-urlencoded
+    const data = qs.stringify(req.body);
+
+    // Faz a requisição para a Microsoft
     const response = await axios.post(
       "https://login.microsoftonline.com/1e6a5fc4-072c-4f6e-bd38-3d312e331366/oauth2/v2.0/token",
-      req.body, // Passa o corpo da requisição
+      data,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -24,16 +29,24 @@ app.post("/get-token", async (req, res) => {
       }
     );
 
-    // Retorna a resposta da Microsoft para o FlutterFlow
+    // Retorna a resposta da Microsoft
     res.json(response.data);
   } catch (error) {
-    // Em caso de erro, retorna uma mensagem de erro
-    res.status(500).json({ error: error.message });
+    console.error(
+      "Erro ao buscar token:",
+      error.response?.data || error.message
+    );
+
+    // Retorna detalhes do erro
+    res.status(error.response?.status || 500).json({
+      error: error.message,
+      details: error.response?.data,
+    });
   }
 });
 
-// Inicia o servidor na porta definida pela Vercel (ou 3000 localmente)
+// Inicia o servidor
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`The proxy server running on port ${port}`);
+  console.log(`Proxy rodando na porta ${port}`);
 });
