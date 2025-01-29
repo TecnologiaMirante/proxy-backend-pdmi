@@ -35,5 +35,5 @@ app.post("/get-token", async (req, res) => {
 // Inicia o servidor na porta definida pela Vercel (ou 3000 localmente)
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Proxy server running on port ${port}`);
+  console.log(`The proxy server running on port ${port}`);
 });
